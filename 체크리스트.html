@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>안전점검 체크리스트</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --pass: #16a34a;
+            --fail: #dc2626;
+            --none: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 12px;
+            padding-bottom: 80px;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            background-color: var(--card-bg);
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 12px;
+            z-index: 100;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        h1 { font-size: 1.1rem; font-weight: 700; }
+        .score-badge {
+            background-color: var(--primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 1rem;
+            background-color: #fff;
+            outline: none;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .category {
+            font-size: 0.75rem;
+            background-color: #eff6ff;
+            color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .score-val {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .item-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px 0;
+            border: 1px solid var(--border);
+            background-color: #f1f5f9;
+            color: #475569;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn.pass.active { background-color: var(--pass); color: white; border-color: var(--pass); }
+        .btn.fail.active { background-color: var(--fail); color: white; border-color: var(--fail); }
+        .btn.none.active { background-color: var(--none); color: white; border-color: var(--none); }
+
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--card-bg);
+            padding: 10px 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+        }
+
+        .footer-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .btn-save { background-color: #059669; color: white; }
+        .btn-export { background-color: var(--primary); color: white; }
+        .btn-reset { background-color: #ef4444; color: white; flex: 0.5; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <h1>안전점검 체크리스트</h1>
+        <div class="score-badge" id="totalScore">0 / 100점</div>
+    </div>
+    <select id="locationSelect" onchange="changeLocation()">
+        <!-- 13개 구역 생성 -->
+    </select>
+</header>
+
+<main id="checklistContainer"></main>
+
+<div class="footer-nav">
+    <button class="footer-btn btn-reset" onclick="resetCurrentForm()">초기화</button>
+    <button class="footer-btn btn-save" onclick="saveCurrentData()">임시저장</button>
+    <button class="footer-btn btn-export" onclick="exportToCSV()">엑셀(CSV) 추출</button>
+</div>
+
+<script>
+    // 항목 데이터 정의
+    const itemsData = [
+        { cat: "추락방지", title: "안전난간 미설치·파손", score: 10 },
+        { cat: "작업발판·비계", title: "작업발판 미설치·틈새 과다", score: 10 },
+        { cat: "작업발판·비계", title: "이동식틀비계 안전조치 미흡", score: 10 },
+        { cat: "작업발판·비계", title: "A형 사다리 부적정 사용", score: 5 },
+        { cat: "장비작업", title: "고소작업대 안전장치 해제·과상승", score: 10 },
+        { cat: "장비작업", title: "지게차 유도자·작업계획 미비", score: 10 },
+        { cat: "장비작업", title: "장비작업구간 통제 미흡", score: 10 },
+        { cat: "기계·공구", title: "전동공구·수공구 안전장치 미설치 및 부적정 사용", score: 5 },
+        { cat: "전기·화기", title: "화기작업 소화기·감시자 미배치", score: 10 },
+        { cat: "전기·화기", title: "가설전기 피복손상·문어발·접지불량", score: 5 },
+        { cat: "전기·화기", title: "분전함 잠금·표지 미비", score: 5 },
+        { cat: "개인보호구", title: "안전모 및 안전대 미착용", score: 5 },
+        { cat: "정리정돈·통로", title: "비상통로·소화기 접근 방해", score: 5 },
+        { cat: "정리정돈·통로", title: "자재·폐자재 적치로 통로 폐쇄", score: 2 },
+        { cat: "정리정돈·통로", title: "작업구간 정리상태 불량", score: 2 },
+        { cat: "작업계획·관리", title: "작업계획서 미제출·미준수", score: 5 },
+        { cat: "기타", title: "전일 부적합 사항 개선조치 이행여부", score: 10 },
+        { cat: "기타", title: "상기 외 지적사항", score: 2 }
+    ];
+
+    const totalLocations = 13;
+    let storeData = JSON.parse(localStorage.getItem('safety_checklist_db')) || {};
+
+    // 셀렉트 박스 초기화
+    const locationSelect = document.getElementById('locationSelect');
+    for (let i = 1; i <= totalLocations; i++) {
+        const option = document.createElement('option');
+        option.value = `구역 ${i}`;
+        option.textContent = `📍 구역 ${i} 점검표`;
+        locationSelect.appendChild(option);
+    }
+
+    // 폼 화면 생성
+    function renderList() {
+        const container = document.getElementById('checklistContainer');
+        container.innerHTML = '';
+        const currentLocation = locationSelect.value;
+        const currentData = storeData[currentLocation] || {};
+
+        itemsData.forEach((item, index) => {
+            const status = currentData[index] || '미평가';
+            
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="card-header">
+                    <span class="category">${item.cat}</span>
+                    <span class="score-val">배점: ${item.score}점</span>
+                </div>
+                <div class="item-title">${item.title}</div>
+                <div class="btn-group">
+                    <button class="btn pass ${status === '양호' ? 'active' : ''}" onclick="setStatus(${index}, '양호')">양호</button>
+                    <button class="btn fail ${status === '지적' ? 'active' : ''}" onclick="setStatus(${index}, '지적')">지적(-${item.score})</button>
+                    <button class="btn none ${status === '해당없음' ? 'active' : ''}" onclick="setStatus(${index}, '해당없음')">해당없음</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        calculateScore();
+    }
+
+    // 판정 상태 변경
+    function setStatus(index, status) {
+        const currentLocation = locationSelect.value;
+        if (!storeData[currentLocation]) storeData[currentLocation] = {};
+        
+        // 동일한 버튼 다시 누르면 미평가 상태로 반환
+        if (storeData[currentLocation][index] === status) {
+            delete storeData[currentLocation][index];
+        } else {
+            storeData[currentLocation][index] = status;
+        }
+
+        renderList();
+    }
+
+    // 구역 변경 시 실행
+    function changeLocation() {
+        renderList();
+    }
+
+    // 점수 계산 (기본 100점 시작, '지적' 시 해당 배점 차감 / '해당없음' 시 총점에서 제외 후 환산)
+    function calculateScore() {
+        const currentLocation = locationSelect.value;
+        const currentData = storeData[currentLocation] || {};
+
+        let maxScore = 100;
+        let penalty = 0;
+
+        itemsData.forEach((item, index) => {
+            const status = currentData[index];
+            if (status === '지적') {
+                penalty += item.score;
+            } else if (status === '해당없음') {
+                maxScore -= item.score; // 해당없음은 총점에서 감점
+            }
+        });
+
+        let finalScore = maxScore - penalty;
+        if (finalScore < 0) finalScore = 0;
+
+        document.getElementById('totalScore').textContent = `${finalScore} / ${maxScore}점`;
+    }
+
+    // 데이터 브라우저에 임시 저장
+    function saveCurrentData() {
+        localStorage.setItem('safety_checklist_db', JSON.stringify(storeData));
+        alert('현재 입력된 데이터가 모바일에 저장되었습니다.');
+    }
+
+    // 현재 구역 초기화
+    function resetCurrentForm() {
+        if (confirm('현재 구역의 점검 내역을 초기화하시겠습니까?')) {
+            const currentLocation = locationSelect.value;
+            delete storeData[currentLocation];
+            saveCurrentData();
+            renderList();
+        }
+    }
+
+    // Excel (CSV) 다운로드 기능
+    function exportToCSV() {
+        let csvContent = "\uFEFF구역,구분,점검항목,배점,판정\n";
+
+        for (let i = 1; i <= totalLocations; i++) {
+            const locName = `구역 ${i}`;
+            const locData = storeData[locName] || {};
+
+            itemsData.forEach((item, index) => {
+                const result = locData[index] || "미평가";
+                csvContent += `"${locName}","${item.cat}","${item.title}",${item.score},"${result}"\n`;
+            });
+        }
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `안전점검_결과_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // 초기 실행
+    renderList();
+</script>
+</body>
+</html>
