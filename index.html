@@ -1,362 +1,359 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>안전점검 체크리스트</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
-            --text: #1e293b;
-            --pass: #16a34a;
-            --fail: #dc2626;
-            --none: #64748b;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>안전점검 체크리스트</title>
+<style>
+  :root{
+    --bg:#f4f5f7;
+    --card:#ffffff;
+    --ink:#1c1f24;
+    --sub:#6b7280;
+    --line:#e6e8eb;
+    --blue:#2563eb;
+    --green:#16a34a;
+    --green-bg:#dcfce7;
+    --red:#dc2626;
+    --red-bg:#fee2e2;
+    --gray-bg:#eceef1;
+    --yellow:#b45309;
+    --yellow-bg:#fef3c7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    padding-bottom:110px;
+  }
+  header{
+    position:sticky;top:0;z-index:10;
+    background:var(--card);
+    border-bottom:1px solid var(--line);
+    padding:14px 16px 12px;
+  }
+  header h1{
+    font-size:17px;margin:0 0 10px;font-weight:700;
+  }
+  .field-row{display:flex;gap:8px;}
+  .field{flex:1;display:flex;flex-direction:column;gap:4px;}
+  .field label{font-size:11px;color:var(--sub);font-weight:600;}
+  select, input[type=date]{
+    width:100%;
+    padding:9px 8px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    font-size:14px;
+    background:#fafafa;
+    color:var(--ink);
+  }
+  .summary{
+    display:flex;gap:8px;margin-top:10px;
+  }
+  .stat{
+    flex:1;background:var(--gray-bg);border-radius:10px;
+    padding:8px 6px;text-align:center;
+  }
+  .stat .num{font-size:16px;font-weight:800;}
+  .stat .lbl{font-size:10px;color:var(--sub);margin-top:2px;}
+  .stat.score .num{color:var(--blue);}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
+  main{padding:12px;}
+  .item-card{
+    background:var(--card);
+    border-radius:14px;
+    padding:12px 14px 14px;
+    margin-bottom:10px;
+    border:1px solid var(--line);
+  }
+  .item-top{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;
+  }
+  .item-title{font-size:14px;font-weight:600;line-height:1.4;flex:1;}
+  .item-idx{font-size:11px;color:var(--sub);font-weight:600;margin-right:4px;}
+  .badge-score{
+    flex-shrink:0;
+    font-size:11px;font-weight:700;
+    background:var(--gray-bg);color:var(--sub);
+    border-radius:8px;padding:3px 8px;white-space:nowrap;
+  }
+  .options{display:flex;gap:6px;flex-wrap:wrap;}
+  .opt{
+    flex:1;min-width:70px;
+    text-align:center;
+    padding:8px 4px;
+    border-radius:9px;
+    border:1.5px solid var(--line);
+    font-size:12.5px;font-weight:700;
+    color:var(--sub);
+    background:#fafafa;
+    user-select:none;
+    cursor:pointer;
+    transition:all .12s;
+  }
+  .opt.active[data-v="적합"]{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+  .opt.active[data-v="부적합"]{background:var(--red-bg);border-color:var(--red);color:var(--red);}
+  .opt.active[data-v="N/A"]{background:var(--gray-bg);border-color:#9ca3af;color:#4b5563;}
+  .opt.active[data-v="미평가"]{background:var(--yellow-bg);border-color:var(--yellow);color:var(--yellow);}
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            padding: 12px;
-            padding-bottom: 80px;
-        }
+  .item-card.unchecked{border-color:#f0b8b8;}
 
-        header {
-            position: sticky;
-            top: 0;
-            background-color: var(--card-bg);
-            padding: 12px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 12px;
-            z-index: 100;
-        }
+  footer{
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--card);
+    border-top:1px solid var(--line);
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    display:flex;gap:8px;
+    z-index:10;
+  }
+  footer button{
+    flex:1;
+    padding:13px 0;
+    border-radius:12px;
+    border:none;
+    font-size:14.5px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  #saveBtn{background:var(--blue);color:#fff;}
+  #resetBtn{background:var(--gray-bg);color:var(--ink);}
+  #shareBtn{background:#111827;color:#fff;}
 
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
+  .toast{
+    position:fixed;left:50%;bottom:90px;transform:translateX(-50%);
+    background:#111827;color:#fff;padding:9px 16px;border-radius:20px;
+    font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:20;
+  }
+  .toast.show{opacity:1;}
 
-        h1 { font-size: 1.1rem; font-weight: 700; }
-        .score-badge {
-            background-color: var(--primary);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-
-        select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            font-size: 1rem;
-            background-color: #fff;
-            outline: none;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 10px;
-            border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-        }
-
-        .category {
-            font-size: 0.75rem;
-            background-color: #eff6ff;
-            color: var(--primary);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 600;
-        }
-
-        .score-val {
-            font-size: 0.75rem;
-            color: #64748b;
-        }
-
-        .item-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            line-height: 1.3;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 6px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 10px 0;
-            border: 1px solid var(--border);
-            background-color: #f1f5f9;
-            color: #475569;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn.pass.active { background-color: var(--pass); color: white; border-color: var(--pass); }
-        .btn.fail.active { background-color: var(--fail); color: white; border-color: var(--fail); }
-        .btn.none.active { background-color: var(--none); color: white; border-color: var(--none); }
-
-        .footer-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: var(--card-bg);
-            padding: 10px 12px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 8px;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
-        }
-
-        .footer-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        .btn-save { background-color: #059669; color: white; }
-        .btn-export { background-color: var(--primary); color: white; }
-        .btn-reset { background-color: #ef4444; color: white; flex: 0.5; }
-    </style>
+  .note{
+    font-size:11px;color:var(--sub);text-align:center;margin:6px 0 2px;
+  }
+</style>
 </head>
 <body>
 
 <header>
-    <div class="header-top">
-        <h1>안전점검 체크리스트</h1>
-        <div class="score-badge" id="totalScore">0 / 100점</div>
+  <h1>🦺 현장 안전점검 체크리스트</h1>
+  <div class="field-row">
+    <div class="field">
+      <label>현장</label>
+      <select id="siteSelect"></select>
     </div>
-    <select id="locationSelect" onchange="changeLocation()">
-        <!-- 13개 구역 생성 -->
-    </select>
+    <div class="field">
+      <label>점검일자</label>
+      <input type="date" id="dateInput">
+    </div>
+  </div>
+  <div class="summary">
+    <div class="stat score"><div class="num" id="scoreNum">-</div><div class="lbl">환산 점수</div></div>
+    <div class="stat"><div class="num" id="doneNum">0/18</div><div class="lbl">점검 완료</div></div>
+    <div class="stat"><div class="num" id="failNum">0</div><div class="lbl">부적합</div></div>
+  </div>
 </header>
 
-<main id="checklistContainer"></main>
+<main id="list"></main>
 
-<div class="footer-nav">
-    <button class="footer-btn btn-reset" onclick="resetCurrentForm()">초기화</button>
-    <button class="footer-btn btn-save" onclick="saveCurrentData()">임시저장</button>
-    <button class="footer-btn btn-export" onclick="exportToCSV()">엑셀(CSV) 추출</button>
-</div>
+<div class="toast" id="toast">저장되었습니다</div>
+
+<footer>
+  <button id="resetBtn">초기화</button>
+  <button id="saveBtn">저장</button>
+  <button id="shareBtn">결과 복사</button>
+</footer>
 
 <script>
-    // 항목 데이터 정의
-    const itemsData = [
-        { cat: "추락방지", title: "안전난간 미설치·파손", score: 10 },
-        { cat: "작업발판·비계", title: "작업발판 미설치·틈새 과다", score: 10 },
-        { cat: "작업발판·비계", title: "이동식틀비계 안전조치 미흡", score: 10 },
-        { cat: "작업발판·비계", title: "A형 사다리 부적정 사용", score: 5 },
-        { cat: "장비작업", title: "고소작업대 안전장치 해제·과상승", score: 10 },
-        { cat: "장비작업", title: "지게차 유도자·작업계획 미비", score: 10 },
-        { cat: "장비작업", title: "장비작업구간 통제 미흡", score: 10 },
-        { cat: "기계·공구", title: "전동공구·수공구 안전장치 미설치 및 부적정 사용", score: 5 },
-        { cat: "전기·화기", title: "화기작업 소화기·감시자 미배치", score: 10 },
-        { cat: "전기·화기", title: "가설전기 피복손상·문어발·접지불량", score: 5 },
-        { cat: "전기·화기", title: "분전함 잠금·표지 미비", score: 5 },
-        { cat: "개인보호구", title: "안전모 및 안전대 미착용", score: 5 },
-        { cat: "정리정돈·통로", title: "비상통로·소화기 접근 방해", score: 5 },
-        { cat: "정리정돈·통로", title: "자재·폐자재 적치로 통로 폐쇄", score: 2 },
-        { cat: "정리정돈·통로", title: "작업구간 정리상태 불량", score: 2 },
-        { cat: "작업계획·관리", title: "작업계획서 미제출·미준수", score: 5 },
-        { cat: "기타", title: "전일 부적합 사항 개선조치 이행여부", score: 10 },
-        { cat: "기타", title: "상기 외 지적사항", score: 2 }
-    ];
-
-    const locations = [
-  "오픈세트1",
-  "오픈세트2",
-  "아일랜드",
-  "구역1",
-  "구역2",
-  "구역3",
-  "구역4",
-  "구역5",
-  "구역6",
-  "구역7",
-  "구역8",
-  "구역9",
-  "구역10",
-  "구역11",
-  "구역12",
-  "구역13"
+const SITES = [
+  "스테이지 1","스테이지 2","스테이지 3","스테이지 4","스테이지 5","스테이지 6",
+  "스테이지 7","스테이지 8","스테이지 9","스테이지 10","스테이지 11","스테이지 12","스테이지 13",
+  "오픈세트1","오픈세트2","아일랜드"
 ];
 
-const locationSelect = document.getElementById('locationSelect');
+const ITEMS = [
+  ["안전난간 미설치·파손",10],
+  ["작업발판 미설치·틈새 과다",10],
+  ["이동식틀비계 안전조치 미흡",10],
+  ["A형 사다리 부적정 사용",5],
+  ["고소작업대 안전장치 해제·과상승",10],
+  ["지게차 유도자·작업계획 미비",10],
+  ["장비작업구간 통제 미흡",10],
+  ["전동공구·수공구 안전장치 미설치 및 부적정 사용",5],
+  ["화기작업 소화기·감시자 미배치",10],
+  ["가설전기 피복손상·문어발·접지불량",10],
+  ["분전함 잠금·표지 미비",5],
+  ["안전모 및 안전대 미착용",5],
+  ["비상통로·소화기 접근 방해",5],
+  ["자재·폐자재 적치로 통로 폐쇄",5],
+  ["작업구간 정리상태 불량",2],
+  ["작업계획서 미제출·미준수",5],
+  ["전일 부적합 사항 개선조치 이행여부",10],
+  ["상기 외 지적사항",2]
+];
 
-locations.forEach(location => {
-    const option = document.createElement('option');
-    option.value = location;
-    option.textContent = `📍 ${location} 점검표`;
-    locationSelect.appendChild(option);
+const STATUSES = ["적합","부적합","N/A","미평가"];
+
+let state = {}; // { itemIndex: status }
+let memoryStore = {}; // fallback if window.storage unavailable
+
+const siteSelect = document.getElementById('siteSelect');
+const dateInput = document.getElementById('dateInput');
+const list = document.getElementById('list');
+
+SITES.forEach(s=>{
+  const o = document.createElement('option');
+  o.value = s; o.textContent = s;
+  siteSelect.appendChild(o);
 });
 
-    // 셀렉트 박스 초기화
-    const locationSelect = document.getElementById('locationSelect');
-    locations.forEach(locName => {
-    const locData = storeData[locName] || {};
+function todayStr(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+dateInput.value = todayStr();
 
-    itemsData.forEach((item, index) => {
-        const result = locData[index] || "미평가";
-        csvContent += `"${locName}","${item.cat}","${item.title}",${item.score},"${result}"\n`;
+function currentKey(){
+  return `checklist:${siteSelect.value}:${dateInput.value}`;
+}
+
+async function storageGet(key){
+  try{
+    const r = await window.storage.get(key, false);
+    return r ? r.value : null;
+  }catch(e){
+    return memoryStore[key] || null;
+  }
+}
+async function storageSet(key, value){
+  try{
+    await window.storage.set(key, value, false);
+  }catch(e){
+    memoryStore[key] = value;
+  }
+}
+
+function renderList(){
+  list.innerHTML = '';
+  ITEMS.forEach((item, idx)=>{
+    const [title, score] = item;
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.dataset.idx = idx;
+
+    const top = document.createElement('div');
+    top.className = 'item-top';
+    top.innerHTML = `<div class="item-title"><span class="item-idx">${idx+1}.</span>${title}</div>
+                      <div class="badge-score">${score}점</div>`;
+    card.appendChild(top);
+
+    const opts = document.createElement('div');
+    opts.className = 'options';
+    STATUSES.forEach(st=>{
+      const o = document.createElement('div');
+      o.className = 'opt';
+      o.dataset.v = st;
+      o.textContent = st;
+      o.addEventListener('click', ()=>{
+        state[idx] = (state[idx] === st) ? null : st;
+        renderList();
+        updateSummary();
+      });
+      opts.appendChild(o);
     });
-}); {
-        const option = document.createElement('option');
-        option.value = `구역 ${i}`;
-        option.textContent = `📍 구역 ${i} 점검표`;
-        locationSelect.appendChild(option);
+    card.appendChild(opts);
+    list.appendChild(card);
+
+    const active = state[idx];
+    if(active){
+      card.classList.remove('unchecked');
+      opts.querySelectorAll('.opt').forEach(o=>{
+        o.classList.toggle('active', o.dataset.v === active);
+      });
+    } else {
+      card.classList.add('unchecked');
     }
+  });
+}
 
-    // 폼 화면 생성
-    function renderList() {
-        const container = document.getElementById('checklistContainer');
-        container.innerHTML = '';
-        const currentLocation = locationSelect.value;
-        const currentData = storeData[currentLocation] || {};
-
-        itemsData.forEach((item, index) => {
-            const status = currentData[index] || '미평가';
-            
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <div class="card-header">
-                    <span class="category">${item.cat}</span>
-                    <span class="score-val">배점: ${item.score}점</span>
-                </div>
-                <div class="item-title">${item.title}</div>
-                <div class="btn-group">
-                    <button class="btn pass ${status === '양호' ? 'active' : ''}" onclick="setStatus(${index}, '양호')">양호</button>
-                    <button class="btn fail ${status === '지적' ? 'active' : ''}" onclick="setStatus(${index}, '지적')">지적(-${item.score})</button>
-                    <button class="btn none ${status === '해당없음' ? 'active' : ''}" onclick="setStatus(${index}, '해당없음')">해당없음</button>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-
-        calculateScore();
+function updateSummary(){
+  let done = 0, fail = 0;
+  let totalWeight = 0, earned = 0;
+  ITEMS.forEach((item, idx)=>{
+    const [, score] = item;
+    const st = state[idx];
+    if(st) done++;
+    if(st === '부적합') fail++;
+    if(st === '적합' || st === '부적합'){
+      totalWeight += score;
+      if(st === '적합') earned += score;
     }
+  });
+  document.getElementById('doneNum').textContent = `${done}/${ITEMS.length}`;
+  document.getElementById('failNum').textContent = fail;
+  const scoreEl = document.getElementById('scoreNum');
+  if(totalWeight === 0){
+    scoreEl.textContent = '-';
+  } else {
+    scoreEl.textContent = Math.round((earned/totalWeight)*100) + '점';
+  }
+}
 
-    // 판정 상태 변경
-    function setStatus(index, status) {
-        const currentLocation = locationSelect.value;
-        if (!storeData[currentLocation]) storeData[currentLocation] = {};
-        
-        // 동일한 버튼 다시 누르면 미평가 상태로 반환
-        if (storeData[currentLocation][index] === status) {
-            delete storeData[currentLocation][index];
-        } else {
-            storeData[currentLocation][index] = status;
-        }
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1400);
+}
 
-        renderList();
-    }
+async function loadForCurrentKey(){
+  const raw = await storageGet(currentKey());
+  state = {};
+  if(raw){
+    try{
+      const parsed = JSON.parse(raw);
+      ITEMS.forEach((_, idx)=>{
+        if(parsed[idx]) state[idx] = parsed[idx];
+      });
+    }catch(e){}
+  }
+  renderList();
+  updateSummary();
+}
 
-    // 구역 변경 시 실행
-    function changeLocation() {
-        renderList();
-    }
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
+  await storageSet(currentKey(), JSON.stringify(state));
+  showToast('저장되었습니다');
+});
 
-    // 점수 계산 (기본 100점 시작, '지적' 시 해당 배점 차감 / '해당없음' 시 총점에서 제외 후 환산)
-    function calculateScore() {
-        const currentLocation = locationSelect.value;
-        const currentData = storeData[currentLocation] || {};
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  state = {};
+  renderList();
+  updateSummary();
+});
 
-        let maxScore = 100;
-        let penalty = 0;
+document.getElementById('shareBtn').addEventListener('click', async ()=>{
+  let lines = [`[안전점검] ${siteSelect.value} / ${dateInput.value}`];
+  ITEMS.forEach((item, idx)=>{
+    const [title] = item;
+    lines.push(`${idx+1}. ${title} : ${state[idx] || '미점검'}`);
+  });
+  const scoreText = document.getElementById('scoreNum').textContent;
+  lines.push(`\n환산점수: ${scoreText} / 부적합 ${document.getElementById('failNum').textContent}건`);
+  const text = lines.join('\n');
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast('결과가 복사되었습니다');
+  }catch(e){
+    showToast('복사 실패 - 직접 선택해 복사해주세요');
+  }
+});
 
-        itemsData.forEach((item, index) => {
-            const status = currentData[index];
-            if (status === '지적') {
-                penalty += item.score;
-            } else if (status === '해당없음') {
-                maxScore -= item.score; // 해당없음은 총점에서 감점
-            }
-        });
+siteSelect.addEventListener('change', loadForCurrentKey);
+dateInput.addEventListener('change', loadForCurrentKey);
 
-        let finalScore = maxScore - penalty;
-        if (finalScore < 0) finalScore = 0;
-
-        document.getElementById('totalScore').textContent = `${finalScore} / ${maxScore}점`;
-    }
-
-    // 데이터 브라우저에 임시 저장
-    function saveCurrentData() {
-        localStorage.setItem('safety_checklist_db', JSON.stringify(storeData));
-        alert('현재 입력된 데이터가 모바일에 저장되었습니다.');
-    }
-
-    // 현재 구역 초기화
-    function resetCurrentForm() {
-        if (confirm('현재 구역의 점검 내역을 초기화하시겠습니까?')) {
-            const currentLocation = locationSelect.value;
-            delete storeData[currentLocation];
-            saveCurrentData();
-            renderList();
-        }
-    }
-
-    // Excel (CSV) 다운로드 기능
-    function exportToCSV() {
-        let csvContent = "\uFEFF구역,구분,점검항목,배점,판정\n";
-
-        for (let i = 1; i <= totalLocations; i++) {
-            const locName = `구역 ${i}`;
-            const locData = storeData[locName] || {};
-
-            itemsData.forEach((item, index) => {
-                const result = locData[index] || "미평가";
-                csvContent += `"${locName}","${item.cat}","${item.title}",${item.score},"${result}"\n`;
-            });
-        }
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `안전점검_결과_${new Date().toISOString().slice(0,10)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    // 초기 실행
-    renderList();
+loadForCurrentKey();
 </script>
 </body>
 </html>
