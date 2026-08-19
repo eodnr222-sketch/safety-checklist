@@ -198,12 +198,44 @@
         { cat: "기타", title: "상기 외 지적사항", score: 2 }
     ];
 
-    const totalLocations = 13;
-    let storeData = JSON.parse(localStorage.getItem('safety_checklist_db')) || {};
+    const locations = [
+  "오픈세트1",
+  "오픈세트2",
+  "아일랜드",
+  "구역1",
+  "구역2",
+  "구역3",
+  "구역4",
+  "구역5",
+  "구역6",
+  "구역7",
+  "구역8",
+  "구역9",
+  "구역10",
+  "구역11",
+  "구역12",
+  "구역13"
+];
+
+const locationSelect = document.getElementById('locationSelect');
+
+locations.forEach(location => {
+    const option = document.createElement('option');
+    option.value = location;
+    option.textContent = `📍 ${location} 점검표`;
+    locationSelect.appendChild(option);
+});
 
     // 셀렉트 박스 초기화
     const locationSelect = document.getElementById('locationSelect');
-    for (let i = 1; i <= totalLocations; i++) {
+    locations.forEach(locName => {
+    const locData = storeData[locName] || {};
+
+    itemsData.forEach((item, index) => {
+        const result = locData[index] || "미평가";
+        csvContent += `"${locName}","${item.cat}","${item.title}",${item.score},"${result}"\n`;
+    });
+}); {
         const option = document.createElement('option');
         option.value = `구역 ${i}`;
         option.textContent = `📍 구역 ${i} 점검표`;
